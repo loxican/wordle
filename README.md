@@ -7,6 +7,6 @@ This game was heavily inspired and a web recreation of [Wordle Edit](https://git
 Libraries used:
 
 * [React](https://svelte.dev/) (web framework)
-* [React Spring](https://react-spring.dev/) (animations)
-* [Twind](https://twind.dev/) (utility-styling)
+* [Framer Motion](https://framer.com/motion) (animations)
+* [Tailwind CSS](https://tailwindcss.com/) (utility-styling)
 * [Socket.io](https://socket.io/) (websocket connections)

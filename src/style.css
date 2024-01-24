@@ -1,0 +1,13 @@
+@font-face {
+    font-family: "Quicksand Bold";
+    src: url("/static/fonts/Quicksand-Bold.ttf");
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+    font-family: "Quicksand Bold";
+}
