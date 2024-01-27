@@ -1,14 +1,15 @@
+export interface Props {
+    letter: string,
+    state: States,
+    classes?: string,
+    displayLetter?: string
+}
+
 export enum States {
     Unassigned,
     Unavaliable,
     Misplaced,
     Aligned
-}
-
-export interface Props {
-    letter: string,
-    state: States,
-    delay: number
 }
 
 export enum BackgroundColours {

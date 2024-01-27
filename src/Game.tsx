@@ -1,11 +1,16 @@
-import { useEffect, useRef, useState } from "react";
-import { Row } from "./components";
+import { useEffect, useState } from "react";
+
+import { KEYS } from "./consts";
 import { answers, validWords } from "./data";
+import { Key as KeyTypes } from "./types";
+import { Row, Key } from "./components";
+import { chooseRandomFromArray, countOccurrencesOfCharacters, getCharactersWithOverlap } from "./utils";
 
 export function Game() {
-    const answer = useRef(answers[Math.floor(Math.random() * answers.length)]);
+    const [answer, setAnswer] = useState(chooseRandomFromArray(answers));
     const [attempts, setAttempts] = useState<string[]>([]);
     const [currentAttempt, setCurrentAttempt] = useState("");
+    const [keyStates, setKeyStates] = useState<Record<string, KeyTypes.States>>(Object.fromEntries(KEYS.join("").split("").map((c) => [c, KeyTypes.States.Unassigned])))
 
     useEffect(() => {
         window.addEventListener("keydown", keyDown);
@@ -14,9 +19,40 @@ export function Game() {
 
     function keyDown({ key }: KeyboardEvent) {
         if (key === "Enter") {
-            if ((currentAttempt.length < 5) || !validWords.includes(currentAttempt)) {
+            if ((currentAttempt.length < 5) || !validWords.includes(currentAttempt) || !answers.includes(currentAttempt)) {
                 return;
             }
+
+            const newKeyStates = keyStates;
+            const overlappedCharacters = getCharactersWithOverlap(currentAttempt, answer);
+            const characterOccurences = countOccurrencesOfCharacters(answer);
+
+            for (const c of overlappedCharacters) {
+                if (!c) {
+                    continue;
+                }
+
+                characterOccurences[c]--;
+
+                newKeyStates[c] = KeyTypes.States.Aligned;
+            }
+
+            for (const c of [...currentAttempt]) {
+                if (newKeyStates[c] === KeyTypes.States.Aligned) {
+                    continue;
+                }
+
+                if (answer.includes(c) && characterOccurences[c]) {
+                    characterOccurences[c]--;
+                    
+                    newKeyStates[c] = KeyTypes.States.Misplaced;
+                    continue;
+                }
+                
+                newKeyStates[c] = KeyTypes.States.Unavaliable;
+            }
+
+            setKeyStates(newKeyStates);  
 
             setAttempts([...attempts, currentAttempt]);
             setCurrentAttempt("");
@@ -42,19 +78,53 @@ export function Game() {
     }
  
     return (
-        <div className="flex flex-col gap-2">
-            {attempts.map((a, i) => 
+        <>
+            <div className="flex flex-col gap-2">
+                {attempts.map((a, i) => 
+                    <Row
+                        key={i}
+                        word={a}
+                        answer={answer}
+                        revealStates
+                    />
+                )}
                 <Row
-                    key={i}
-                    word={a}
-                    answer={answer.current}
+                    word={currentAttempt}
+                    answer={answer}
                 />
-            )}
-            <Row
-                word={currentAttempt}
-                answer=""    
-            />
-            <input />
-        </div>
+            </div>
+            <div className="absolute bottom-0 flex flex-col gap-2 w-full">
+                <div className="h-12">
+                    <Key
+                        letter="Backspace"
+                        state={KeyTypes.States.Unassigned}
+                        classes="absolute left-0 w-32"
+                        displayLetter="⌫"
+                    />
+                    <Key
+                        letter="Enter"
+                        state={KeyTypes.States.Unassigned}
+                        classes="absolute right-0 w-32"
+                        displayLetter="⏎"
+                    />
+                </div>
+                <div className="flex flex-col h-36">
+                    {KEYS.map((keys, i) =>
+                        <div
+                            key={i}
+                            className="flex flex-row justify-center"
+                        >
+                            {keys.split("").map((c, i) =>
+                                <Key 
+                                    key={i}
+                                    letter={c}
+                                    state={keyStates[c]}
+                                />
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
     );
 }

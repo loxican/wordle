@@ -1,12 +1,14 @@
-import { Tile } from ".";
+import { motion } from "framer-motion";
+
 import { Tile as TileTypes, RowProps } from "../types";
+import { Tile } from ".";
 import { countOccurrencesOfCharacters, getCharactersWithOverlap } from "../utils";
 
-export function Row({ word, answer }: RowProps) {
+export function Row({ word, answer, revealStates }: RowProps) {
     const tileStates: TileTypes.States[] = [];
 
-    if (answer) {
-        const overlappedCharacters= getCharactersWithOverlap(word, answer);
+    if (word.length === 5) {
+        const overlappedCharacters = getCharactersWithOverlap(word, answer);
         const characterOccurences = countOccurrencesOfCharacters(answer);
 
         for (const i of overlappedCharacters.keys()) {
@@ -30,20 +32,25 @@ export function Row({ word, answer }: RowProps) {
                 tileStates[i] = TileTypes.States.Misplaced;
                 continue;
             }
-
-            tileStates[i] = TileTypes.States.Unavaliable;
+      
+            tileStates[i] = TileTypes.States.Unavaliable
         }
     }
 
     return (
-        <div className="flex flex-row gap-2">
+        <motion.div
+            className="flex flex-row gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+        >
             {Array.from(Array(5).keys()).map((i) =>
                 <Tile
                     key={i}
                     letter={word[i] || ""}
-                    state={answer ? tileStates[i] : TileTypes.States.Awaiting}
+                    state={revealStates ? tileStates[i] : TileTypes.States.Unassigned}
+                    delay={i * 0.3}
                 />
             )}
-        </div>
+        </motion.div>
     );
 }
