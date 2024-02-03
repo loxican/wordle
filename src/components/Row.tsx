@@ -1,54 +1,57 @@
 import { motion } from "framer-motion";
 
-import { Tile as TileTypes, RowProps } from "../types";
+import { ANIMATION_DURATION, GAME } from "../constants";
+import { Props, Hint } from "../types";
 import { Tile } from ".";
 import { countOccurrencesOfCharacters, getCharactersWithOverlap } from "../utils";
 
-export function Row({ word, answer, revealStates }: RowProps) {
-    const tileStates: TileTypes.States[] = [];
+export function Row({ word, answer, revealStates = false, skipAnimations = false }: Props.Row) {
+    const tileStates: Hint.States[] = [];
 
-    if (word.length === 5) {
+    if (revealStates) {
         const overlappedCharacters = getCharactersWithOverlap(word, answer);
-        const characterOccurences = countOccurrencesOfCharacters(answer);
+        const characterOccurrences = countOccurrencesOfCharacters(answer);
 
         for (const i of overlappedCharacters.keys()) {
             if (!overlappedCharacters[i]) {
                 continue;
             }
 
-            characterOccurences[overlappedCharacters[i]]--;
+            characterOccurrences[overlappedCharacters[i]]--;
 
-            tileStates[i] = TileTypes.States.Aligned;
+            tileStates[i] = Hint.States.Aligned;
         }
 
         for (const i of [...word].keys()) {
-            if (tileStates[i] === TileTypes.States.Aligned) {
+            if (tileStates[i] === Hint.States.Aligned) {
                 continue;
             }
 
-            if (answer.includes(word[i]) && characterOccurences[word[i]]) {
-                characterOccurences[overlappedCharacters[i]]--;
+            if (answer.includes(word[i]) && characterOccurrences[word[i]]) {
+                characterOccurrences[overlappedCharacters[i]]--;
                 
-                tileStates[i] = TileTypes.States.Misplaced;
+                tileStates[i] = Hint.States.Misplaced;
                 continue;
             }
-      
-            tileStates[i] = TileTypes.States.Unavaliable
+            
+            tileStates[i] = Hint.States.Unavailable
         }
     }
 
     return (
         <motion.div
-            className="flex flex-row gap-2"
+            className="flex flex-row gap-2 justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={{ duration: ANIMATION_DURATION.ROW_APPEAR }}
         >
-            {Array.from(Array(5).keys()).map((i) =>
+            {Array.from(Array(GAME.WORD_LENGTH).keys()).map((i) =>
                 <Tile
                     key={i}
                     letter={word[i] || ""}
-                    state={revealStates ? tileStates[i] : TileTypes.States.Unassigned}
-                    delay={i * 0.3}
+                    state={revealStates ? tileStates[i] : Hint.States.Awaiting}
+                    duration={ANIMATION_DURATION.HINT_REVEAL * +!skipAnimations}
+                    delay={(i * ANIMATION_DURATION.HINT_REVEAL) * +!skipAnimations}
                 />
             )}
         </motion.div>

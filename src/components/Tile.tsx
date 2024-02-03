@@ -1,22 +1,29 @@
 import { motion } from "framer-motion";
-import { Tile as TileTypes } from "../types";
+import { Hint, Props } from "../types";
 
-export function Tile({ letter, state, delay }: TileTypes.Props) {
+export function Tile({ letter, state, duration, delay }: Props.Tile) {
     return (
         <motion.div
-            className="aspect-square grid place-items-center w-16 h-16 text-4xl font-bold text-white uppercase rounded-lg"
-            initial={{ backgroundColor: TileTypes.BackgroundColours.Default }}
+            className="aspect-square grid place-items-center w-12 h-12 text-4xl font-bold text-white uppercase rounded-lg"
+            initial={{ backgroundColor: Hint.Colours.Awaiting }}
             animate={{
-                backgroundColor:
-                    (state === TileTypes.States.Unassigned)
-                        ? TileTypes.BackgroundColours.Default
-                        : (state === TileTypes.States.Unavaliable)
-                            ? TileTypes.BackgroundColours.Unavaliable
-                            : (state === TileTypes.States.Misplaced)
-                                ? TileTypes.BackgroundColours.Misplaced
-                                : TileTypes.BackgroundColours.Aligned
+                backgroundColor: (() => {
+                    switch (state) {
+                        case Hint.States.Unavailable:
+                            return Hint.Colours.Unavailable;
+
+                        case Hint.States.Misplaced:
+                            return Hint.Colours.Misplaced;
+
+                        case Hint.States.Aligned:
+                            return Hint.Colours.Aligned;
+                        
+                        default:
+                            return Hint.Colours.Awaiting;
+                    }
+                })()
             }}
-            transition={{ delay }}
+            transition={{ duration, delay }}
         >{letter}</motion.div>
-    )
+    );
 }

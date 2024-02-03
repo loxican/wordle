@@ -1,12 +1,11 @@
-# Wordle Battle
+# Wordle
 
-Play against players all over the world and challenge against them to complete wordles as fast as possible while they *mess* with the answers!
+A re-playable version of Wordle for my portfolio.
 
-This game was heavily inspired and a web recreation of [Wordle Edit](https://github.com/carykh/WordleEdit) by [Cary Huang](https://youtube.com/@carykh).
+[Original version](https://www.nytimes.com/games/wordle/index.html) by New York Times.
 
 Libraries used:
 
 * [React](https://svelte.dev/) (web framework)
 * [Framer Motion](https://framer.com/motion) (animations)
 * [Tailwind CSS](https://tailwindcss.com/) (utility-styling)
-* [Socket.io](https://socket.io/) (websocket connections)

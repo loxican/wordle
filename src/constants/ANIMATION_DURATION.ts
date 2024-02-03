@@ -1,0 +1,5 @@
+export const ANIMATION_DURATION = {
+    HINT_REVEAL: 0.5,
+    ROW_APPEAR: 0.4,
+    END_SCREEN_TRANSITION: 0.7
+}

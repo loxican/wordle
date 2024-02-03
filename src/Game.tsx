@@ -1,61 +1,70 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
-import { KEYS } from "./consts";
+import { GAME, KEYS } from "./constants";
 import { answers, validWords } from "./data";
-import { Key as KeyTypes } from "./types";
-import { Row, Key } from "./components";
+import { EndScreenStates, Hint, LocalStorageKeys } from "./types";
+import { Row, Key, EndScreen } from "./components";
 import { chooseRandomFromArray, countOccurrencesOfCharacters, getCharactersWithOverlap } from "./utils";
 
 export function Game() {
-    const [answer, setAnswer] = useState(chooseRandomFromArray(answers));
-    const [attempts, setAttempts] = useState<string[]>([]);
-    const [currentAttempt, setCurrentAttempt] = useState("");
-    const [keyStates, setKeyStates] = useState<Record<string, KeyTypes.States>>(Object.fromEntries(KEYS.join("").split("").map((c) => [c, KeyTypes.States.Unassigned])))
+    // TODO: add score history
+    const [answer, setAnswer] = useState((localStorage.getItem(LocalStorageKeys.Answer) === null) ? chooseRandomFromArray(answers) : localStorage.getItem(LocalStorageKeys.Answer)!);
+    const [attempts, setAttempts] = useState((localStorage.getItem(LocalStorageKeys.Attempts) === null) ? Array<string>(GAME.MAX_ATTEMPTS).fill("") : JSON.parse(localStorage.getItem(LocalStorageKeys.Attempts)!) as string[]);
+    const [attemptIndex, setAttemptIndex] = useState((localStorage.getItem(LocalStorageKeys.AttemptIndex) === null) ? 0 : +localStorage.getItem(LocalStorageKeys.AttemptIndex)!);
+    const [keyStates, setKeyStates] = useState<Record<string, Hint.States>>(Object.fromEntries(KEYS.join("").split("").map((c) => [c, Hint.States.Awaiting])));
+    const [endScreenState, setEndScreenState] = useState(
+        (attempts[Math.min(attemptIndex, GAME.MAX_ATTEMPTS - 1)] === answer)
+            ? EndScreenStates.Won
+            : (attemptIndex >= GAME.MAX_ATTEMPTS)
+                ? EndScreenStates.Lost
+                : EndScreenStates.Hidden
+    );
+
+    const [firstLoad, setFirstLoad] = useState(true);
+    const keyStateHandler = useCallback((i: number) => {
+        handleKeyStates(i);
+    }, [handleKeyStates]);
+
+    localStorage.setItem(LocalStorageKeys.Answer, answer);
+    localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(attempts));
+    localStorage.setItem(LocalStorageKeys.AttemptIndex, `${attemptIndex}`);
 
     useEffect(() => {
-        window.addEventListener("keydown", keyDown);
-        return () => window.removeEventListener("keydown", keyDown);
+        for (const i of Array(attemptIndex).keys()) {
+            keyStateHandler(i);
+        }
+
+        setFirstLoad(false);
+    }, [attemptIndex, keyStateHandler]);
+
+    useEffect(() => {
+        window.addEventListener("keydown", handleKeyPress);
+        return () => window.removeEventListener("keydown", handleKeyPress);
     });
 
-    function keyDown({ key }: KeyboardEvent) {
+    function handleKeyPress({ key }: KeyboardEvent) {
+        if (attemptIndex >= GAME.MAX_ATTEMPTS) {
+            return;
+        }
+
+        const newAttempts = Array.from(attempts);
+        const currentAttempt = attempts[attemptIndex];
+
         if (key === "Enter") {
-            if ((currentAttempt.length < 5) || !validWords.includes(currentAttempt) || !answers.includes(currentAttempt)) {
+            if ((currentAttempt.length < 5) || (!validWords.includes(currentAttempt) && !answers.includes(currentAttempt))) {
                 return;
             }
 
-            const newKeyStates = keyStates;
-            const overlappedCharacters = getCharactersWithOverlap(currentAttempt, answer);
-            const characterOccurences = countOccurrencesOfCharacters(answer);
+            handleKeyStates(attemptIndex);
 
-            for (const c of overlappedCharacters) {
-                if (!c) {
-                    continue;
-                }
-
-                characterOccurences[c]--;
-
-                newKeyStates[c] = KeyTypes.States.Aligned;
+            if (attempts[attemptIndex] === answer) {
+                setEndScreenState(EndScreenStates.Won);
+            } else if ((attemptIndex + 1) >= GAME.MAX_ATTEMPTS) {
+                setEndScreenState(EndScreenStates.Lost);
             }
 
-            for (const c of [...currentAttempt]) {
-                if (newKeyStates[c] === KeyTypes.States.Aligned) {
-                    continue;
-                }
-
-                if (answer.includes(c) && characterOccurences[c]) {
-                    characterOccurences[c]--;
-                    
-                    newKeyStates[c] = KeyTypes.States.Misplaced;
-                    continue;
-                }
-                
-                newKeyStates[c] = KeyTypes.States.Unavaliable;
-            }
-
-            setKeyStates(newKeyStates);  
-
-            setAttempts([...attempts, currentAttempt]);
-            setCurrentAttempt("");
+            setAttemptIndex(attemptIndex + 1);
+            localStorage.setItem(LocalStorageKeys.AttemptIndex, `${attemptIndex + 1}`);
 
             return;
         }
@@ -65,8 +74,11 @@ export function Game() {
                 return;
             }
 
-            setCurrentAttempt(currentAttempt.substring(0, currentAttempt.length - 1));
-
+            newAttempts[attemptIndex] = newAttempts[attemptIndex].substring(0, currentAttempt.length - 1);
+            
+            setAttempts(newAttempts);
+            localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(newAttempts));
+            
             return;
         }
 
@@ -74,45 +86,85 @@ export function Game() {
             return;
         }
 
-        setCurrentAttempt(currentAttempt + key.toLowerCase());
+        newAttempts[attemptIndex] = currentAttempt + key;
+
+        setAttempts(newAttempts);
+        localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(newAttempts));
     }
- 
+
+    function handleKeyStates(attemptIndex: number) {
+        const newKeyStates = keyStates;
+        const attempt = attempts[Math.min(attemptIndex, GAME.MAX_ATTEMPTS - 1)];
+
+        const overlappedCharacters = getCharactersWithOverlap(attempt, answer);
+        const characterOccurrences = countOccurrencesOfCharacters(answer);
+
+        for (const c of overlappedCharacters) {
+            if (!c) {
+                continue;
+            }
+
+            characterOccurrences[c]--;
+
+            newKeyStates[c] = Hint.States.Aligned;
+        }
+
+        for (const c of [...attempt]) {
+            if (newKeyStates[c] === Hint.States.Aligned) {
+                continue;
+            }
+
+            if (answer.includes(c) && characterOccurrences[c]) {
+                characterOccurrences[c]--;
+                
+                newKeyStates[c] = Hint.States.Misplaced;
+                continue;
+            }
+            
+            newKeyStates[c] = Hint.States.Unavailable;
+        }
+
+        setKeyStates(newKeyStates);
+    }
+
+    function resetGame() {
+        const newAnswer = chooseRandomFromArray(answers);
+        setAnswer(newAnswer);
+        localStorage.setItem(LocalStorageKeys.Answer, newAnswer);
+
+        const newAttempts = Array(GAME.MAX_ATTEMPTS).fill("");
+        setAttempts(newAttempts);
+        localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(newAttempts));
+
+        const newAttemptIndex = 0;
+        setAttemptIndex(newAttemptIndex);
+        localStorage.setItem(LocalStorageKeys.AttemptIndex, `${newAttemptIndex}`);
+
+        setKeyStates(Object.fromEntries(KEYS.join("").split("").map((c) => [c, Hint.States.Awaiting])));
+        setEndScreenState(EndScreenStates.Hidden);
+        setFirstLoad(true);
+    }
+
+    // TODO: put elements into separate components
     return (
-        <>
+        <div className="overflow-hidden relative p-4 w-screen max-md:w-[100svw] h-screen max-md:h-[100svh]">
             <div className="flex flex-col gap-2">
                 {attempts.map((a, i) => 
                     <Row
                         key={i}
                         word={a}
                         answer={answer}
-                        revealStates
+                        revealStates={i < attemptIndex}
+                        skipAnimations={firstLoad}
                     />
                 )}
-                <Row
-                    word={currentAttempt}
-                    answer={answer}
-                />
             </div>
-            <div className="absolute bottom-0 flex flex-col gap-2 w-full">
-                <div className="h-12">
-                    <Key
-                        letter="Backspace"
-                        state={KeyTypes.States.Unassigned}
-                        classes="absolute left-0 w-32"
-                        displayLetter="⌫"
-                    />
-                    <Key
-                        letter="Enter"
-                        state={KeyTypes.States.Unassigned}
-                        classes="absolute right-0 w-32"
-                        displayLetter="⏎"
-                    />
-                </div>
-                <div className="flex flex-col h-36">
+            <div className="flex flex-col absolute left-1/2 max-md:left-0 bottom-0 gap-2 p-2 w-[24rem] max-md:w-full md:-translate-x-1/2">
+                <div className="flex flex-col gap-1">
                     {KEYS.map((keys, i) =>
                         <div
                             key={i}
-                            className="flex flex-row justify-center"
+                            className="flex flex-row gap-[1%] justify-center w-full"
                         >
                             {keys.split("").map((c, i) =>
                                 <Key 
@@ -124,7 +176,27 @@ export function Game() {
                         </div>
                     )}
                 </div>
+                <div className="flex flex-row justify-between h-10">
+                    <Key
+                        letter="Backspace"
+                        state={Hint.States.Awaiting}
+                        width="20%"
+                        displayLetter="⌫"
+                    />
+                    <Key
+                        letter="Enter"
+                        state={Hint.States.Awaiting}
+                        width="20%"
+                        displayLetter="⏎"
+                    />
+                </div>
             </div>
-        </>
+            <EndScreen
+                state={endScreenState}
+                answer={answer}
+                onProceed={resetGame}
+                skipDelay={firstLoad}
+            />
+        </div>
     );
 }
