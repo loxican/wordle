@@ -8,10 +8,11 @@ export function hexToHSL(c: string) {
 
     return {
         get h() {
-            let h = 0;
             if (!delta) {
-                return h;
+                return 0;
             }
+
+            let h = 0;
     
             switch(max) {
                 case r: {
@@ -27,7 +28,7 @@ export function hexToHSL(c: string) {
                 default: h = ((r - g) / delta) + 4;
             }
 
-            return h * 60;
+            return (h * 60) % 360;
         },
 
         s: (delta / sum) * 100,

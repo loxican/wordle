@@ -1,19 +1,19 @@
 import { motion } from "framer-motion";
-import { Props, Hint } from "../types";
-import { ANIMATION_DURATION, GAME } from "../constants";
-import { hexToHSL } from "../utils";
 
-export function Key({ letter, state, width = "9%", displayLetter }: Props.Key) {
-    // TODO: add animations
-    const backgroundColour = hexToHSL(
-        (state === Hint.States.Unavailable)
-            ? Hint.Colours.Unavailable
-            : (state === Hint.States.Misplaced)
-                ? Hint.Colours.Misplaced
-                : (state === Hint.States.Aligned)
-                    ? Hint.Colours.Aligned
-                    : Hint.Colours.Awaiting
-    );
+import { ANIMATION_DURATION, COLOURS } from "../constants";
+import { Props, HintStates, Theme } from "../types";
+import { hexToHSL, getColourFromTheme } from "../utils";
+
+export function Key({ letter, state, width = "9%", displayLetter, displayImageSrc, theme }: Props.Key) {
+    const backgroundColour = hexToHSL(getColourFromTheme(theme, 
+        (state === HintStates.Unavailable)
+            ? COLOURS.HINT.UNAVAILABLE
+            : (state === HintStates.Misplaced)
+                ? COLOURS.HINT.MISPLACED
+                : (state === HintStates.Aligned)
+                    ? COLOURS.HINT.ALIGNED
+                    : COLOURS.HINT.AWAITING
+    ));
 
     function onClick() {
         window.dispatchEvent(new KeyboardEvent("keydown", { key: letter }));
@@ -22,13 +22,16 @@ export function Key({ letter, state, width = "9%", displayLetter }: Props.Key) {
     return (
         <motion.button
             className="grid place-items-center h-10 font-bold text-white uppercase rounded-lg"
-            style={{ width, backgroundColor: `hsl(${backgroundColour.h} ${backgroundColour.s}% ${backgroundColour.l}%)` }}
-            transition={{
-                duration: ANIMATION_DURATION.HINT_REVEAL,
-                delay: GAME.WORD_LENGTH * ANIMATION_DURATION.HINT_REVEAL
-            }}
+            style={{ width }}
+            animate={{ backgroundColor: `hsl(${backgroundColour.h} ${backgroundColour.s}% ${backgroundColour.l}%)` }}
+            transition={{ duration: ANIMATION_DURATION.KEY_HOVER }}
             onClick={onClick}
-            whileHover={{ backgroundColor: `hsl(${backgroundColour.h} ${backgroundColour.s}% ${backgroundColour.l - 20}%)` }}
-        >{displayLetter || letter}</motion.button>
+            whileHover={{ backgroundColor: `hsl(${backgroundColour.h} ${backgroundColour.s * 1.2}% ${backgroundColour.l + ((1 - (+(theme === Theme.States.Light) * 2)) * 10)}%)` }}
+        >{displayImageSrc ? <img
+            src={displayImageSrc}
+            className="aspect-square"
+            style={{ width: "1.5rem" }}
+            alt={`${letter} key`}
+        /> : displayLetter || letter}</motion.button>
     );
 }

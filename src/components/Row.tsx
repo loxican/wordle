@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 
 import { ANIMATION_DURATION, GAME } from "../constants";
-import { Props, Hint } from "../types";
+import { Props, HintStates } from "../types";
 import { Tile } from ".";
 import { countOccurrencesOfCharacters, getCharactersWithOverlap } from "../utils";
 
-export function Row({ word, answer, revealStates = false, skipAnimations = false }: Props.Row) {
-    const tileStates: Hint.States[] = [];
+export function Row({ word, answer, revealStates = false, skipAnimations = false, theme }: Props.Row) {
+    const tileStates: HintStates[] = [];
 
     if (revealStates) {
         const overlappedCharacters = getCharactersWithOverlap(word, answer);
@@ -19,22 +19,22 @@ export function Row({ word, answer, revealStates = false, skipAnimations = false
 
             characterOccurrences[overlappedCharacters[i]]--;
 
-            tileStates[i] = Hint.States.Aligned;
+            tileStates[i] = HintStates.Aligned;
         }
 
         for (const i of [...word].keys()) {
-            if (tileStates[i] === Hint.States.Aligned) {
+            if (tileStates[i] === HintStates.Aligned) {
                 continue;
             }
 
             if (answer.includes(word[i]) && characterOccurrences[word[i]]) {
                 characterOccurrences[overlappedCharacters[i]]--;
                 
-                tileStates[i] = Hint.States.Misplaced;
+                tileStates[i] = HintStates.Misplaced;
                 continue;
             }
             
-            tileStates[i] = Hint.States.Unavailable
+            tileStates[i] = HintStates.Unavailable
         }
     }
 
@@ -49,9 +49,10 @@ export function Row({ word, answer, revealStates = false, skipAnimations = false
                 <Tile
                     key={i}
                     letter={word[i] || ""}
-                    state={revealStates ? tileStates[i] : Hint.States.Awaiting}
+                    state={revealStates ? tileStates[i] : HintStates.Awaiting}
                     duration={ANIMATION_DURATION.HINT_REVEAL * +!skipAnimations}
                     delay={(i * ANIMATION_DURATION.HINT_REVEAL) * +!skipAnimations}
+                    theme={theme}
                 />
             )}
         </motion.div>
