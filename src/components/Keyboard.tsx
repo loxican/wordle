@@ -1,4 +1,4 @@
-import { KEYS } from "../constants";
+import { IMAGES, KEYS } from "../constants";
 import { HintStates, Props } from "../types";
 import { Key } from ".";
 
@@ -28,6 +28,7 @@ export function Keyboard({ keyStates, theme }: Props.Keyboard) {
                     state={HintStates.Awaiting}
                     width="20%"
                     displayLetter="⌫"
+                    displaySrc={IMAGES.KEYS.BACKSPACE}
                     theme={theme}
                 />
                 <Key
@@ -35,6 +36,7 @@ export function Keyboard({ keyStates, theme }: Props.Keyboard) {
                     state={HintStates.Awaiting}
                     width="20%"
                     displayLetter="⏎"
+                    displaySrc={IMAGES.KEYS.ENTER}
                     theme={theme}
                 />
             </div>

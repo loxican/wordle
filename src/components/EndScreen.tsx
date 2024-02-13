@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-import { ANIMATION_DURATION, COLOURS, GAME } from "../constants";
+import { ANIMATION_DURATION, COLOURS, GAME, TEXTS } from "../constants";
 import { EndScreenStates, Props, Theme } from "../types";
 import { getColourFromTheme, hexToHSL } from "../utils";
 import { ScoreHistory } from ".";
@@ -37,11 +37,11 @@ export function EndScreen({ state, answer, scoreHistory, onProceed, skipDelay, t
             >
                 <div className="text-center gap-2">
                     <p className="text-4xl">{
-                        (state === EndScreenStates.Hidden)
-                            ? "Restarting Game..."
-                            : (state === EndScreenStates.Won)
-                                ? "You won!"
-                                : "You lost!"
+                        (state === EndScreenStates.Won)
+                            ? TEXTS.END_SCREEN.WON
+                            : (state === EndScreenStates.Lost)
+                                ? TEXTS.END_SCREEN.LOST
+                                : TEXTS.END_SCREEN.HIDDEN
                     }</p>
                     {(state === EndScreenStates.Lost) && <p>Correct Answer: {answer}</p>}
                 </div>

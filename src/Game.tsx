@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 
-import { ANIMATION_DURATION, COLOURS, GAME, KEYS } from "./constants";
+import { ANIMATION_DURATION, COLOURS, GAME, IMAGES, KEYS, TEXTS } from "./constants";
 import { EndScreenStates, HintStates, LocalStorageKeys, Theme } from "./types";
 import { answers, validWords } from "./data";
-import { Wordle, EndScreen, Keyboard, Icon } from "./components";
+import { Wordle, EndScreen, Keyboard, Icon, MessageList } from "./components";
 import { chooseRandomFromArray, countOccurrencesOfCharacters, getCharactersWithOverlap, getColourFromTheme } from "./utils";
 
 export function Game() {
@@ -21,6 +21,7 @@ export function Game() {
     );
 
     const [firstLoad, setFirstLoad] = useState(true);
+    const [messageTexts, setMessageTexts] = useState<string[]>([]);
     const [theme, setTheme] = useState<Theme.States>(
         (localStorage.getItem(LocalStorageKeys.Theme) === null)
             ? window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -73,7 +74,19 @@ export function Game() {
         const currentAttempt = attempts[attemptIndex];
 
         if (key === "Enter") {
-            if ((currentAttempt.length < 5) || (!validWords.includes(currentAttempt) && !answers.includes(currentAttempt))) {
+            if ((currentAttempt.length < 5)) {
+                const newMessageTexts = Array.from(messageTexts);
+                newMessageTexts.push(TEXTS.MESSAGE.WORD_TOO_SHORT);
+                setMessageTexts(newMessageTexts);
+
+                return;
+            }
+
+            if (!validWords.includes(currentAttempt) && !answers.includes(currentAttempt)) {
+                const newMessageTexts = Array.from(messageTexts);
+                newMessageTexts.push(TEXTS.MESSAGE.INVALID_WORD);
+                setMessageTexts(newMessageTexts);
+
                 return;
             }
 
@@ -97,7 +110,9 @@ export function Game() {
             setAttemptIndex(attemptIndex + 1);
             localStorage.setItem(LocalStorageKeys.AttemptIndex, `${attemptIndex + 1}`);
 
-            return () => {clearTimeout(keyStateHandler);};
+            return () => {
+                clearTimeout(keyStateHandler);
+            };
         }
 
         if (key === "Backspace") {
@@ -121,24 +136,23 @@ export function Game() {
 
         setAttempts(newAttempts);
         localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(newAttempts));
-    }, [answer, attempts, attemptIndex, handleKeyStates, scoreHistory, setFirstLoad]);
+    }, [answer, attempts, attemptIndex, handleKeyStates, scoreHistory, setFirstLoad, messageTexts]);
 
     useEffect(() => {
         localStorage.setItem(LocalStorageKeys.Answer, answer);
         localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(attempts));
         localStorage.setItem(LocalStorageKeys.AttemptIndex, `${attemptIndex}`);
 
+        window.addEventListener("keydown", handleKeyPress);
+
         for (const i of Array(attemptIndex).keys()) {
             handleKeyStates(i);
         }
 
         setFirstLoad(false);
-    }, [answer, attempts, attemptIndex, handleKeyStates]);
 
-    useEffect(() => {
-        window.addEventListener("keydown", handleKeyPress);
         return () => window.removeEventListener("keydown", handleKeyPress);
-    });
+    }, [answer, attempts, attemptIndex, handleKeyStates, handleKeyPress]);
 
     function resetGame() {
         const newAnswer = chooseRandomFromArray(answers);
@@ -193,18 +207,13 @@ export function Game() {
                 theme={theme}
             />
             <Icon
-                svg={
-                    <path
-                        d="M 151.578 159.823 C 111.649 191.287 53.069 185.296 20.735 146.441 C -11.599 107.587 -5.442 50.582 34.488 19.119 C 47.737 8.677 63.042 2.361 78.759 0 C 78.092 0.499 77.431 1.008 76.774 1.527 C 38.136 31.974 29.485 83.899 57.454 117.507 C 85.421 151.114 139.415 153.678 178.054 123.231 C 178.711 122.713 179.359 122.189 180 121.658 C 174.36 136.129 164.83 149.383 151.578 159.823 Z"
-                        style={{
-                            fill: getColourFromTheme(theme, COLOURS.ICON),
-                            transformOrigin: "75.058px 103.635px"
-                        }}
-                    ></path>
-                }
-                viewBox="0 0 180 180"
-                className="absolute top-2 left-2 w-6"
+                src={(theme === Theme.States.Light) ? IMAGES.ICONS.DARK : IMAGES.ICONS.LIGHT}
+                className="absolute top-2 left-2 w-8 max-md:w-6"
                 onClick={toggleTheme}
+            />
+            <MessageList
+                texts={messageTexts}
+                theme={theme}
             />
         </div>
     );

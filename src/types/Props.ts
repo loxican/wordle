@@ -1,4 +1,3 @@
-import { ReactNode } from "react";
 import { EndScreenStates, HSL, HintStates, Theme } from ".";
 
 export interface Wordle {
@@ -36,7 +35,7 @@ export interface Key {
     state: HintStates,
     width?: string,
     displayLetter?: string,
-    displayImageSrc?: string,
+    displaySrc?: string,
     theme: Theme.States
 }
 
@@ -49,15 +48,24 @@ export interface EndScreen {
     theme: Theme.States
 }
 
-export interface Icon {
-    svg: ReactNode,
-    className?: string,
-    viewBox: string,
-    onClick(): void
-}
-
 export interface ScoreHistory {
     scoreHistory: number[],
     backgroundColour: HSL,
+    theme: Theme.States
+}
+
+export interface Icon {
+    src: string,
+    alt?: string,
+    className?: string,
+    onClick(): void
+}
+
+export interface MessageList {
+    texts: string[],
+    theme: Theme.States
+}
+export interface Message {
+    text: string,
     theme: Theme.States
 }

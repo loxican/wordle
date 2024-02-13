@@ -1,15 +1,12 @@
-import { motion } from "framer-motion";
 import { Props } from "../types";
 
-export function Icon({ svg, className, viewBox, onClick }: Props.Icon) {
+export function Icon({ src, alt, className, onClick }: Props.Icon) {
     return (
-        <motion.svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox={viewBox}
+        <button
             className={className}
             onClick={onClick}
         >
-            {svg}
-        </motion.svg>
+            <img src={src} alt={alt} />
+        </button>
     );
 }

@@ -28,13 +28,13 @@ export function Row({ word, answer, revealStates = false, skipAnimations = false
             }
 
             if (answer.includes(word[i]) && characterOccurrences[word[i]]) {
-                characterOccurrences[overlappedCharacters[i]]--;
+                characterOccurrences[word[i]]--;
                 
                 tileStates[i] = HintStates.Misplaced;
                 continue;
             }
             
-            tileStates[i] = HintStates.Unavailable
+            tileStates[i] = HintStates.Unavailable;
         }
     }
 

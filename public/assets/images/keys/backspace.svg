@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 82 42" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <path d="M -81 -41 H -24.383 L -24.383 -41 L -1 -21 L -24.383 -1 L -24.383 -1 H -81 V -41 Z" style="fill: none; stroke-width: 2px; stroke-linecap: round; stroke-linejoin: round; stroke: rgb(255, 255, 255);" transform="matrix(-1, 0, 0, -1, 2.842170943040401e-14, 3.552713678800501e-15)" bx:shape="arrow -81 -41 80 40 40 23.383 0 1@b8a07ef8"/>
+  <path d="M 60.626 27.47 H 62.626 V 36.471 H 71.626 V 38.471 H 62.626 V 47.472 H 60.626 V 38.471 H 51.626 V 36.471 H 60.626 Z" style="fill: rgb(255, 255, 255); transform-origin: 61.626px 37.471px;" transform="matrix(0.707102119923, 0.707111120224, -0.707102119923, 0.707111120224, -9.379081166427, -16.470940845175)" bx:shape="cross 51.626 27.47 20 20.002 2 2 0.5 1@680081e1"/>
+</svg>

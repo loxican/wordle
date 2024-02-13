@@ -4,5 +4,7 @@ export { Row } from "./Row";
 export { Keyboard } from "./Keyboard";
 export { Key } from "./Key";
 export { EndScreen } from "./EndScreen";
-export { Icon } from "./Icon";
 export { ScoreHistory } from "./ScoreHistory";
+export { Icon } from "./Icon";
+export { MessageList } from "./MessageList";
+export { Message } from "./Message";
