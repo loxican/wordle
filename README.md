@@ -17,7 +17,5 @@ Start the game by keying in a 5-letter word of your choice. Entering the word wi
 ## Libraries used
 
 * [React](https://svelte.dev/) (web framework)
-
 * [Framer Motion](https://framer.com/motion) (animations)
-
 * [Tailwind CSS](https://tailwindcss.com/) (utility-styling)
