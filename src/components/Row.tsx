@@ -5,7 +5,7 @@ import { Props, HintStates } from "../types";
 import { Tile } from ".";
 import { countOccurrencesOfCharacters, getCharactersWithOverlap } from "../utils";
 
-export function Row({ word, answer, revealStates = false, skipAnimations = false, theme }: Props.Row) {
+export function Row({ word, answer, revealStates = false, skipAnimations = false }: Props.Row) {
     const tileStates: HintStates[] = [];
 
     if (revealStates) {
@@ -52,7 +52,7 @@ export function Row({ word, answer, revealStates = false, skipAnimations = false
                     state={revealStates ? tileStates[i] : HintStates.Awaiting}
                     duration={ANIMATION_DURATION.HINT_REVEAL * +!skipAnimations}
                     delay={(i * ANIMATION_DURATION.HINT_REVEAL) * +!skipAnimations}
-                    theme={theme}
+                    forceMute={skipAnimations}
                 />
             )}
         </motion.div>

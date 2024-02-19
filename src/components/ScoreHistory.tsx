@@ -1,10 +1,16 @@
+import { useContext } from "react";
 import { motion } from "framer-motion";
 
 import { COLOURS, GAME } from "../constants";
 import { Props, Theme } from "../types";
-import { getColourFromTheme } from "../utils";
+import { getValueFromTheme, hexToHSL } from "../utils";
 
-export function ScoreHistory({ scoreHistory, backgroundColour, theme}: Props.ScoreHistory) {
+import { GameContext } from "../Game";
+
+export function ScoreHistory({ scoreHistory }: Props.ScoreHistory) {
+    const { theme } = useContext(GameContext);
+    const backgroundColour = hexToHSL(getValueFromTheme(theme, COLOURS.BACKGROUND));
+
     return (
         <div
             className="flex flex-col gap-2 p-4 rounded-xl"
@@ -18,7 +24,7 @@ export function ScoreHistory({ scoreHistory, backgroundColour, theme}: Props.Sco
                     <p className="w-2">{(i >= GAME.MAX_ATTEMPTS) ? "L" : i + 1}</p>
                     <motion.div
                         className="absolute left-4 h-6 rounded-r-md"
-                        style={{ backgroundColor: getColourFromTheme(theme, (i >= GAME.MAX_ATTEMPTS) ? COLOURS.HINT.UNAVAILABLE : COLOURS.HINT.ALIGNED) }}
+                        style={{ backgroundColor: getValueFromTheme(theme, (i >= GAME.MAX_ATTEMPTS) ? COLOURS.HINT.UNAVAILABLE : COLOURS.HINT.ALIGNED) }}
                         animate={{ width: ["0", `${(s / Math.max(...a, 1)) * 12}rem`] }}
                         transition={{ duration: 1 }}
                     >
@@ -29,7 +35,7 @@ export function ScoreHistory({ scoreHistory, backgroundColour, theme}: Props.Sco
                                 color:
                                     ((s / Math.max(...a, 1)) > (`${s}`.length * 0.05))
                                         ? "white"
-                                        : getColourFromTheme(theme, COLOURS.TEXT)
+                                        : getValueFromTheme(theme, COLOURS.TEXT)
                             }}
                         >{s}</p>
                     </motion.div>

@@ -1,19 +1,16 @@
-import { EndScreenStates, HSL, HintStates, Theme } from ".";
+import { EndScreenStates, HintStates } from ".";
 
 export interface Wordle {
     answer: string,
     attempts: string[],
-    attemptIndex: number,
-    firstLoad?: boolean,
-    theme: Theme.States
+    attemptIndex: number
 }
 
 export interface Row {
     word: string,
     answer: string,
     revealStates?: boolean,
-    skipAnimations?: boolean,
-    theme: Theme.States
+    skipAnimations?: boolean
 }
 
 export interface Tile {
@@ -21,13 +18,11 @@ export interface Tile {
     state: HintStates,
     duration: number,
     delay: number,
-    theme: Theme.States
+    forceMute?: boolean
 }
 
 export interface Keyboard {
-    keyStates: Record<string, HintStates>,
-    firstLoad?: boolean,
-    theme: Theme.States
+    keyStates: Record<string, HintStates>
 }
 
 export interface Key {
@@ -35,8 +30,7 @@ export interface Key {
     state: HintStates,
     width?: string,
     displayLetter?: string,
-    displaySrc?: string,
-    theme: Theme.States
+    displaySrc?: string
 }
 
 export interface EndScreen {
@@ -44,28 +38,19 @@ export interface EndScreen {
     answer: string,
     scoreHistory: number[],
     onProceed(): void,
-    skipDelay?: boolean,
-    theme: Theme.States
+    skipDelay?: boolean
 }
 
 export interface ScoreHistory {
-    scoreHistory: number[],
-    backgroundColour: HSL,
-    theme: Theme.States
+    scoreHistory: number[]
 }
 
 export interface Icon {
     src: string,
     alt?: string,
     className?: string,
-    onClick(): void
-}
-
-export interface MessageList {
-    texts: string[],
-    theme: Theme.States
+    onPointerDown(): void
 }
 export interface Message {
-    text: string,
-    theme: Theme.States
+    text: string
 }

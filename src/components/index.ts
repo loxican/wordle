@@ -6,5 +6,4 @@ export { Key } from "./Key";
 export { EndScreen } from "./EndScreen";
 export { ScoreHistory } from "./ScoreHistory";
 export { Icon } from "./Icon";
-export { MessageList } from "./MessageList";
 export { Message } from "./Message";

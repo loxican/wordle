@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="0 0 82 62" xmlns="http://www.w3.org/2000/svg">
-  <path d="M 21.078 49 L 21.078 61 L 1 41 L 21.078 21 L 21.078 33 L 65 33 L 65 1 L 81 1 L 81 49 L 21.078 49 Z" style="fill: none; stroke-linejoin: round; stroke-linecap: round; stroke-width: 2px; stroke: rgb(255, 255, 255);" transform="matrix(1, 0, 0, 1, 2.842170943040401e-14, 3.552713678800501e-15)"/>
+<svg viewBox="0 0 84 64" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 22.078 50 L 22.078 62 L 2 42 L 22.078 22 L 22.078 34 L 66 34 L 66 2 L 82 2 L 82 50 L 22.078 50 Z" style="fill: none; stroke-linejoin: round; stroke-linecap: round; stroke: rgb(255, 255, 255); stroke-width: 4px;" transform="matrix(1, 0, 0, 1, 2.842170943040401e-14, 3.552713678800501e-15)"/>
 </svg>

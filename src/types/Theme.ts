@@ -3,7 +3,7 @@ export enum States {
     Dark
 }
 
-export interface Colours {
-    LIGHT: string
-    DARK: string
+export interface Object<T> {
+    LIGHT: T
+    DARK: T
 }

@@ -3,5 +3,6 @@ export enum LocalStorageKeys {
     Attempts = "attempts",
     AttemptIndex = "attempt-index",
     ScoreHistory = "score-history",
-    Theme = "theme"
+    Theme = "theme",
+    AllowSound = "allow-sound"
 }

@@ -1,12 +1,15 @@
 import { Props } from "../types";
 
-export function Icon({ src, alt, className, onClick }: Props.Icon) {
+export function Icon({ src, alt, className, onPointerDown }: Props.Icon) {
     return (
         <button
             className={className}
-            onClick={onClick}
+            onPointerDown={onPointerDown}
         >
-            <img src={src} alt={alt} />
+            <img
+                src={src}
+                alt={alt}
+            />
         </button>
     );
 }

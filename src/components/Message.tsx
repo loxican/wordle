@@ -1,11 +1,14 @@
+import { useContext, useEffect } from "react";
 import { motion, useAnimate } from "framer-motion";
 
 import { ANIMATION_DURATION, COLOURS } from "../constants";
 import { Props } from "../types";
-import { getColourFromTheme } from "../utils";
-import { useEffect } from "react";
+import { getValueFromTheme } from "../utils";
 
-export function Message({ text, theme }: Props.Message) {
+import { GameContext } from "../Game";
+
+export function Message({ text }: Props.Message) {
+    const { theme } = useContext(GameContext);
     const [scope, animate] = useAnimate();
     
     async function animateElement() {
@@ -26,8 +29,8 @@ export function Message({ text, theme }: Props.Message) {
     return (
         <motion.div
             ref={scope}
-            className="grid place-items-center p-2 w-64 h-16 text-white rounded-md"
-            style={{ backgroundColor: getColourFromTheme(theme, COLOURS.HINT.UNAVAILABLE) }}
+            className="grid absolute top-4 left-1/2 place-items-center p-2 w-64 h-16 text-white rounded-md -translate-x-1/2"
+            style={{ backgroundColor: getValueFromTheme(theme, COLOURS.HINT.UNAVAILABLE) }}
         >
             <p className="text-sm font-bold text-center text-white">{text}</p>
         </motion.div>

@@ -1,10 +1,16 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, createContext } from "react";
 
-import { ANIMATION_DURATION, COLOURS, GAME, IMAGES, KEYS, TEXTS } from "./constants";
+import { ANIMATION_DURATION, COLOURS, GAME, IMAGES, KEYS, SOUNDS, TEXTS } from "./constants";
 import { EndScreenStates, HintStates, LocalStorageKeys, Theme } from "./types";
 import { answers, validWords } from "./data";
-import { Wordle, EndScreen, Keyboard, Icon, MessageList } from "./components";
-import { chooseRandomFromArray, countOccurrencesOfCharacters, getCharactersWithOverlap, getColourFromTheme } from "./utils";
+import { Wordle, EndScreen, Keyboard, Icon, Message } from "./components";
+import { chooseRandomFromArray, countOccurrencesOfCharacters, getCharactersWithOverlap, getValueFromTheme, playSound } from "./utils";
+
+export const GameContext = createContext({
+    theme: Theme.States.Dark,
+    allowSound: true,
+    firstLoad: true
+});
 
 export function Game() {
     const [answer, setAnswer] = useState((localStorage.getItem(LocalStorageKeys.Answer) === null) ? chooseRandomFromArray(answers) : localStorage.getItem(LocalStorageKeys.Answer)!);
@@ -21,7 +27,7 @@ export function Game() {
     );
 
     const [firstLoad, setFirstLoad] = useState(true);
-    const [messageTexts, setMessageTexts] = useState<string[]>([]);
+    const [message, setMessage] = useState("");
     const [theme, setTheme] = useState<Theme.States>(
         (localStorage.getItem(LocalStorageKeys.Theme) === null)
             ? window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -29,6 +35,8 @@ export function Game() {
                 : Theme.States.Light
             : +(localStorage.getItem(LocalStorageKeys.Theme)!)
     );
+
+    const [allowSound, setAllowSound] = useState((localStorage.getItem(LocalStorageKeys.AllowSound) === null) ? true : /true/.test(localStorage.getItem(LocalStorageKeys.AllowSound)!));
 
     const handleKeyStates = useCallback((i: number) => {
         const newKeyStates = keyStates;
@@ -75,25 +83,36 @@ export function Game() {
 
         if (key === "Enter") {
             if ((currentAttempt.length < 5)) {
-                const newMessageTexts = Array.from(messageTexts);
-                newMessageTexts.push(TEXTS.MESSAGE.WORD_TOO_SHORT);
-                setMessageTexts(newMessageTexts);
+                allowSound && playSound(SOUNDS.ANSWER.INVALID);
 
-                return;
+                if (message === TEXTS.MESSAGE.WORD_TOO_SHORT) {
+                    return;
+                }
+
+                setMessage(TEXTS.MESSAGE.WORD_TOO_SHORT);
+                const messageHandler = setTimeout(() => setMessage(""), ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
+
+                return () => clearTimeout(messageHandler);
             }
 
             if (!validWords.includes(currentAttempt) && !answers.includes(currentAttempt)) {
-                const newMessageTexts = Array.from(messageTexts);
-                newMessageTexts.push(TEXTS.MESSAGE.INVALID_WORD);
-                setMessageTexts(newMessageTexts);
+                allowSound && playSound(SOUNDS.ANSWER.INVALID);
 
-                return;
+                if (message === TEXTS.MESSAGE.INVALID_WORD) {
+                    return;
+                }
+
+                setMessage(TEXTS.MESSAGE.INVALID_WORD);
+                const messageHandler = setTimeout(() => setMessage(""), ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
+
+                return () => clearTimeout(messageHandler);
             }
 
             const keyStateHandler = setTimeout(() => {
                 handleKeyStates(attemptIndex);
                 setFirstLoad(true);
             }, (ANIMATION_DURATION.HINT_REVEAL * (GAME.MAX_ATTEMPTS - 1)) * 1000);
+
             const newScoreHistory = Array.from(scoreHistory);
 
             if (attempts[attemptIndex] === answer) {
@@ -110,9 +129,9 @@ export function Game() {
             setAttemptIndex(attemptIndex + 1);
             localStorage.setItem(LocalStorageKeys.AttemptIndex, `${attemptIndex + 1}`);
 
-            return () => {
-                clearTimeout(keyStateHandler);
-            };
+            allowSound && playSound(SOUNDS.ANSWER.VALID);
+
+            return () => clearTimeout(keyStateHandler);
         }
 
         if (key === "Backspace") {
@@ -136,7 +155,7 @@ export function Game() {
 
         setAttempts(newAttempts);
         localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(newAttempts));
-    }, [answer, attempts, attemptIndex, handleKeyStates, scoreHistory, setFirstLoad, messageTexts]);
+    }, [answer, attempts, attemptIndex, handleKeyStates, scoreHistory, setFirstLoad, message, allowSound]);
 
     useEffect(() => {
         localStorage.setItem(LocalStorageKeys.Answer, answer);
@@ -179,42 +198,51 @@ export function Game() {
         localStorage.setItem(LocalStorageKeys.Theme, `${newTheme}`);
         
         setFirstLoad(true);
+
+        allowSound && playSound(SOUNDS.CLICK);
+    }
+    function toggleAllowSound() {
+        const newAllowSound =!allowSound;
+        
+        setAllowSound(newAllowSound);
+        localStorage.setItem(LocalStorageKeys.AllowSound, `${newAllowSound}`);
+
+        allowSound && new Audio();
     }
 
     return (
+        <GameContext.Provider value={{ theme, allowSound, firstLoad }} >
         <div 
             className="overflow-hidden relative p-4 w-screen max-md:w-[100svw] max-w-full h-screen max-md:h-[100svh] max-h-full select-none"
-            style={{ backgroundColor: getColourFromTheme(theme, COLOURS.BACKGROUND) }}
+            style={{ backgroundColor: getValueFromTheme(theme, COLOURS.BACKGROUND) }}
         >
             <Wordle
                 answer={answer}
                 attempts={attempts}
                 attemptIndex={attemptIndex}
-                firstLoad={firstLoad}
-                theme={theme}
             />
-            <Keyboard
-                keyStates={keyStates}
-                firstLoad={firstLoad}
-                theme={theme}
-            />
+            <Keyboard keyStates={keyStates} />
             <EndScreen
                 state={endScreenState}
                 answer={answer}
                 scoreHistory={scoreHistory}
                 onProceed={resetGame}
                 skipDelay={firstLoad}
-                theme={theme}
             />
             <Icon
-                src={(theme === Theme.States.Light) ? IMAGES.ICONS.DARK : IMAGES.ICONS.LIGHT}
+                src={getValueFromTheme(theme, IMAGES.ICONS.THEME)}
                 className="absolute top-2 left-2 w-8 max-md:w-6"
-                onClick={toggleTheme}
+                onPointerDown={toggleTheme}
             />
-            <MessageList
-                texts={messageTexts}
-                theme={theme}
+            <Icon
+                src={getValueFromTheme(theme, allowSound ? IMAGES.ICONS.SOUND.ENABLED : IMAGES.ICONS.SOUND.MUTED)}
+                className="absolute top-2 right-2 w-8 max-md:w-6"
+                onPointerDown={toggleAllowSound}
             />
+            {message && <Message
+                text={message}
+            />}
         </div>
+        </GameContext.Provider>
     );
 }

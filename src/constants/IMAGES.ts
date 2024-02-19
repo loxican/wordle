@@ -1,7 +1,21 @@
 export const IMAGES = {
     ICONS: {
-        LIGHT: "assets/images/icons/light.svg",
-        DARK: "assets/images/icons/dark.svg"
+        THEME: {
+            LIGHT: "assets/images/icons/theme-light.svg",
+            DARK: "assets/images/icons/theme-dark.svg"
+        },
+
+        SOUND: {
+            ENABLED: {
+                LIGHT: "assets/images/icons/sound-enabled-light.svg",
+                DARK: "assets/images/icons/sound-enabled-dark.svg"
+            },
+
+            MUTED: {
+                LIGHT: "assets/images/icons/sound-muted-light.svg",
+                DARK: "assets/images/icons/sound-muted-dark.svg"
+            }
+        }
     },
     
     KEYS: {
