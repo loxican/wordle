@@ -28,6 +28,7 @@ export function Game() {
 
     const [firstLoad, setFirstLoad] = useState(true);
     const [message, setMessage] = useState("");
+    const [messageCount, setMessageCount] = useState(0);
     const [theme, setTheme] = useState<Theme.States>(
         (localStorage.getItem(LocalStorageKeys.Theme) === null)
             ? window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -85,27 +86,37 @@ export function Game() {
             if ((currentAttempt.length < 5)) {
                 allowSound && playSound(SOUNDS.ANSWER.INVALID);
 
-                if (message === TEXTS.MESSAGE.WORD_TOO_SHORT) {
-                    return;
-                }
-
                 setMessage(TEXTS.MESSAGE.WORD_TOO_SHORT);
-                const messageHandler = setTimeout(() => setMessage(""), ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
-
-                return () => clearTimeout(messageHandler);
+                setMessageCount(messageCount + 1);
+                
+                const messageHandler = setTimeout(() => {
+                    setMessageCount(messageCount - 1);
+                    
+                    if (messageCount > 1) {
+                        return;
+                    }
+                    
+                    setMessage("");     
+                }, ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
+                return () => clearInterval(messageHandler);
             }
 
             if (!validWords.includes(currentAttempt) && !answers.includes(currentAttempt)) {
                 allowSound && playSound(SOUNDS.ANSWER.INVALID);
 
-                if (message === TEXTS.MESSAGE.INVALID_WORD) {
-                    return;
-                }
+                setMessage(TEXTS.MESSAGE.WORD_TOO_SHORT);
+                setMessageCount(messageCount + 1);
+                
+                const messageHandler = setTimeout(() => {
+                    setMessageCount(messageCount + 1);
 
-                setMessage(TEXTS.MESSAGE.INVALID_WORD);
-                const messageHandler = setTimeout(() => setMessage(""), ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
+                    if (messageCount > 1) {
+                        return;
+                    }
 
-                return () => clearTimeout(messageHandler);
+                    setMessage("");
+                }, ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
+                return () => clearInterval(messageHandler);
             }
 
             const keyStateHandler = setTimeout(() => {
@@ -155,7 +166,7 @@ export function Game() {
 
         setAttempts(newAttempts);
         localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(newAttempts));
-    }, [answer, attempts, attemptIndex, handleKeyStates, scoreHistory, setFirstLoad, message, allowSound]);
+    }, [answer, attempts, attemptIndex, handleKeyStates, scoreHistory, setFirstLoad, allowSound, messageCount]);
 
     useEffect(() => {
         localStorage.setItem(LocalStorageKeys.Answer, answer);
@@ -170,7 +181,9 @@ export function Game() {
 
         setFirstLoad(false);
 
-        return () => window.removeEventListener("keydown", handleKeyPress);
+        return () => {
+            window.removeEventListener("keydown", handleKeyPress);
+        }
     }, [answer, attempts, attemptIndex, handleKeyStates, handleKeyPress]);
 
     function resetGame() {
@@ -201,6 +214,7 @@ export function Game() {
 
         allowSound && playSound(SOUNDS.CLICK);
     }
+
     function toggleAllowSound() {
         const newAllowSound =!allowSound;
         
@@ -212,37 +226,35 @@ export function Game() {
 
     return (
         <GameContext.Provider value={{ theme, allowSound, firstLoad }} >
-        <div 
-            className="overflow-hidden relative p-4 w-screen max-md:w-[100svw] max-w-full h-screen max-md:h-[100svh] max-h-full select-none"
-            style={{ backgroundColor: getValueFromTheme(theme, COLOURS.BACKGROUND) }}
-        >
-            <Wordle
-                answer={answer}
-                attempts={attempts}
-                attemptIndex={attemptIndex}
-            />
-            <Keyboard keyStates={keyStates} />
-            <EndScreen
-                state={endScreenState}
-                answer={answer}
-                scoreHistory={scoreHistory}
-                onProceed={resetGame}
-                skipDelay={firstLoad}
-            />
-            <Icon
-                src={getValueFromTheme(theme, IMAGES.ICONS.THEME)}
-                className="absolute top-2 left-2 w-8 max-md:w-6"
-                onPointerDown={toggleTheme}
-            />
-            <Icon
-                src={getValueFromTheme(theme, allowSound ? IMAGES.ICONS.SOUND.ENABLED : IMAGES.ICONS.SOUND.MUTED)}
-                className="absolute top-2 right-2 w-8 max-md:w-6"
-                onPointerDown={toggleAllowSound}
-            />
-            {message && <Message
-                text={message}
-            />}
-        </div>
+            <div 
+                className="overflow-hidden relative p-4 w-screen max-md:w-[100svw] max-w-full h-screen max-md:h-[100svh] max-h-full select-none"
+                style={{ backgroundColor: getValueFromTheme(theme, COLOURS.BACKGROUND) }}
+            >
+                <Wordle
+                    answer={answer}
+                    attempts={attempts}
+                    attemptIndex={attemptIndex}
+                />
+                <Keyboard keyStates={keyStates} />
+                <EndScreen
+                    state={endScreenState}
+                    answer={answer}
+                    scoreHistory={scoreHistory}
+                    onProceed={resetGame}
+                    skipDelay={firstLoad}
+                />
+                <Icon
+                    src={getValueFromTheme(theme, IMAGES.ICONS.THEME)}
+                    className="absolute top-2 left-2 w-8 max-md:w-6"
+                    onPointerDown={toggleTheme}
+                />
+                <Icon
+                    src={getValueFromTheme(theme, allowSound ? IMAGES.ICONS.SOUND.ENABLED : IMAGES.ICONS.SOUND.MUTED)}
+                    className="absolute top-2 right-2 w-8 max-md:w-6"
+                    onPointerDown={toggleAllowSound}
+                />
+                {message && <Message text={message}/>}
+            </div>
         </GameContext.Provider>
     );
 }

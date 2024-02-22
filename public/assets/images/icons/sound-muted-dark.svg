@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-  <path d="M 0 23.352 L 15.565 23.352 L 37.399 0 L 37.399 80 L 14.354 55.352 L 0 55.352 L 0 23.352 Z" style="fill: rgb(45, 45, 45);" transform="matrix(1, 0, 0, 0.9999999999999999, 0, 0)"/>
+  <path d="M 0 23.352 L 15.565 23.352 L 37.399 0 L 37.399 80 L 14.354 55.352 L 0 55.352 L 0 23.352 Z" style="fill: rgb(45, 45, 45);" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, -1.4210854715202004e-14, 0)"/>
+  <line style="fill: none; stroke-width: 4px; stroke-linecap: round; stroke-linejoin: round; stroke: rgb(45, 45, 45); transform-origin: 40px 40px;" x1="2" y1="78" x2="78" y2="2" transform="matrix(-1, 0, 0, -1, -0.000003546938, 0.000004082456)"/>
 </svg>
