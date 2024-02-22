@@ -104,11 +104,11 @@ export function Game() {
             if (!validWords.includes(currentAttempt) && !answers.includes(currentAttempt)) {
                 allowSound && playSound(SOUNDS.ANSWER.INVALID);
 
-                setMessage(TEXTS.MESSAGE.WORD_TOO_SHORT);
+                setMessage(TEXTS.MESSAGE.INVALID_WORD);
                 setMessageCount(messageCount + 1);
                 
                 const messageHandler = setTimeout(() => {
-                    setMessageCount(messageCount + 1);
+                    setMessageCount(messageCount - 1);
 
                     if (messageCount > 1) {
                         return;
@@ -253,7 +253,7 @@ export function Game() {
                     className="absolute top-2 right-2 w-8 max-md:w-6"
                     onPointerDown={toggleAllowSound}
                 />
-                {message && <Message text={message}/>}
+                {(message && (messageCount > 0)) && <Message text={message}/>}
             </div>
         </GameContext.Provider>
     );
