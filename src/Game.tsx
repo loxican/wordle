@@ -28,7 +28,6 @@ export function Game() {
 
     const [firstLoad, setFirstLoad] = useState(true);
     const [message, setMessage] = useState("");
-    const [messageCount, setMessageCount] = useState(0);
     const [theme, setTheme] = useState<Theme.States>(
         (localStorage.getItem(LocalStorageKeys.Theme) === null)
             ? window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -86,36 +85,24 @@ export function Game() {
             if ((currentAttempt.length < 5)) {
                 allowSound && playSound(SOUNDS.ANSWER.INVALID);
 
-                setMessage(TEXTS.MESSAGE.WORD_TOO_SHORT);
-                setMessageCount(messageCount + 1);
-                
-                const messageHandler = setTimeout(() => {
-                    setMessageCount(messageCount - 1);
-                    
-                    if (messageCount > 1) {
-                        return;
-                    }
-                    
-                    setMessage("");     
-                }, ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
+                if (message) {
+                    return;
+                }
+
+                setMessage(TEXTS.MESSAGE.WORD_TOO_SHORT);                
+                const messageHandler = setTimeout(() => setMessage(""), ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
                 return () => clearInterval(messageHandler);
             }
 
             if (!validWords.includes(currentAttempt) && !answers.includes(currentAttempt)) {
                 allowSound && playSound(SOUNDS.ANSWER.INVALID);
 
-                setMessage(TEXTS.MESSAGE.INVALID_WORD);
-                setMessageCount(messageCount + 1);
-                
-                const messageHandler = setTimeout(() => {
-                    setMessageCount(messageCount - 1);
+                if (message) {
+                    return;
+                }
 
-                    if (messageCount > 1) {
-                        return;
-                    }
-
-                    setMessage("");
-                }, ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
+                setMessage(TEXTS.MESSAGE.INVALID_WORD);           
+                const messageHandler = setTimeout(() => setMessage(""), ((ANIMATION_DURATION.MESSAGE_TRANSITION * 2) + ANIMATION_DURATION.MESSAGE_HIDE_DELAY) * 1000);
                 return () => clearInterval(messageHandler);
             }
 
@@ -166,7 +153,7 @@ export function Game() {
 
         setAttempts(newAttempts);
         localStorage.setItem(LocalStorageKeys.Attempts, JSON.stringify(newAttempts));
-    }, [answer, attempts, attemptIndex, handleKeyStates, scoreHistory, setFirstLoad, allowSound, messageCount]);
+    }, [answer, attempts, attemptIndex, handleKeyStates, scoreHistory, setFirstLoad, allowSound, message]);
 
     useEffect(() => {
         localStorage.setItem(LocalStorageKeys.Answer, answer);
@@ -253,7 +240,7 @@ export function Game() {
                     className="absolute top-2 right-2 w-8 max-md:w-6"
                     onPointerDown={toggleAllowSound}
                 />
-                {(message && (messageCount > 0)) && <Message text={message}/>}
+                {message && <Message text={message}/>}
             </div>
         </GameContext.Provider>
     );
