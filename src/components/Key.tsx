@@ -33,7 +33,7 @@ export function Key({ letter, state, width = "9%", displayLetter, displaySrc }: 
             onPointerDown={onPointerDown}
             whileHover={{ backgroundColor: `hsl(${backgroundColour.h} ${backgroundColour.s * 1.2}% ${backgroundColour.l + ((1 - (+(theme === Theme.States.Light) * 2)) * 10)}%)` }}
         >{displaySrc ? <img
-            className="h-4"
+            className="h-3"
             src={displaySrc}
             alt={letter}
         /> : displayLetter || letter}</motion.button>

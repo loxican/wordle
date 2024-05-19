@@ -1,13 +1,13 @@
-const audios: HTMLAudioElement[] = [];
+const audios: Record<string, HTMLAudioElement[]> = {};
 
 export function playSound(s: string) {
-    let audio = audios.find(({ paused }) => paused);
-
+    audios[s] ??= [new Audio(s)]
+    
+    let audio = audios[s].find(({ paused }) => paused);
     if (!audio) {
         audio = new Audio(s);
-        audios.push(audio);
+        audios[s].push(audio);
     }
-    
-    audio.src = s;
+
     audio.play();
 }
